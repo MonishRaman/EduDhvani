@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome to EduDhvani</h2>
+<form method="post">
+    <label>Name:</label>
+    <input name="name" required>
+    <label>School Type:</label>
+    <select name="school_type" required>
+        <option value="Government">Government</option>
+        <option value="Private">Private</option>
+    </select>
+    <label>State:</label>
+    <select name="state" required>
+        {% for state in states %}
+        <option value="{{ state }}">{{ state }}</option>
+        {% endfor %}
+    </select>
+    <label>Grade:</label>
+    <select name="grade" required>
+        {% for grade in grades %}
+        <option value="{{ grade }}">{{ grade }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Start Learning</button>
+</form>
+{% endblock %}

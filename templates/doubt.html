@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Submit Your Doubt (Voice)</h2>
+<form method="post" enctype="multipart/form-data">
+    <label>Upload voice file (mp3/wav):</label>
+    <input type="file" name="voice" accept="audio/*" required>
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}
