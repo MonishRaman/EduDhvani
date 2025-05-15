@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson: {{ chapter_name }} | EduApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Baloo 2', cursive; background: #e3f2fd; }
+        .container { max-width: 700px; margin: 30px auto; }
+        .mascot { width: 60px; margin-bottom: 10px; }
+        .lesson-card { border-radius: 18px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        .lesson-header { background: #6ec6ff; color: #fff; border-radius: 18px 18px 0 0; padding: 24px 0 10px 0; text-align: center; }
+        .lesson-header h1 { font-size: 2.2rem; }
+        .badge-completed { color: #27ae60; font-weight: bold; margin-left: 10px; font-size: 1.2em; }
+        .media-section, .quiz-section, .voice-section { padding: 24px; }
+        .quiz-section { background: #fffbe7; border-radius: 18px; }
+        .question { margin-bottom: 18px; }
+        .options label { margin-right: 18px; cursor: pointer; }
+        .feedback { font-weight: bold; margin-left: 10px; }
+        .correct { color: #27ae60; }
+        .incorrect { color: #c0392b; }
+        button { background: #2980b9; color: #fff; border: none; padding: 10px 22px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        button:disabled { background: #bdc3c7; }
+        .voice-section { background: #e3f2fd; border-radius: 18px; margin-top: 24px; }
+        .voice-controls button { margin-right: 10px; }
+        #audioPlayback { margin-top: 10px; }
+        #completedBadge { color: #27ae60; font-weight: bold; margin-left: 10px; }
+        #prevScore { margin-top: 10px; color: #2980b9; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="lesson-card">
+        <div class="lesson-header">
+            <img src="/static/icons/icon-192.png" class="mascot" alt="Mascot">
+            <h1>Lesson: {{ chapter_name }} <span id="completedBadge" style="display:none;">✓ Completed</span></h1>
+            <div id="prevScore"></div>
+        </div>
+        {% if lesson %}
+            <div class="media-section">
+                {% if lesson.video_url %}
+                    <h2>Animation Video</h2>
+                    <video width="100%" controls>
+                        <source src="{{ lesson.video_url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                {% endif %}
+                {% if lesson.audio_url %}
+                    <h2>Audio Summary</h2>
+                    <audio controls style="width:100%;">
+                        <source src="{{ lesson.audio_url }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                {% endif %}
+            </div>
+            {% if lesson.quiz %}
+            <div class="quiz-section mt-4">
+                <h2>Quiz</h2>
+                <form id="quizForm" onsubmit="return false;">
+                    {% for q in lesson.quiz %}
+                    <div class="question" data-answer="{{ q.answer }}">
+                        <strong>{{ loop.index }}. {{ q.question }}</strong><br>
+                        <div class="options">
+                            {% for opt in q.options %}
+                            <label>
+                                <input type="radio" name="q{{ loop.index0 }}" value="{{ opt }}"> {{ opt }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <span class="feedback" id="feedback{{ loop.index0 }}"></span>
+                    </div>
+                    {% endfor %}
+                    <button type="button" onclick="checkQuiz()">Check Answers</button>
+                </form>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+            <script type="text/javascript">
+            // ---- User Progress Utilities ----
+            function getUserProgress() {
+                const progress = localStorage.getItem('eduUserProgress');
+                return progress ? JSON.parse(progress) : { completedChapters: [], quizScores: {} };
+            }
+            function saveUserProgress(progress) {
+                localStorage.setItem('eduUserProgress', JSON.stringify(progress));
+            }
+            function markChapterCompleted(chapterKey) {
+                const progress = getUserProgress();
+                if (!progress.completedChapters.includes(chapterKey)) {
+                    progress.completedChapters.push(chapterKey);
+                    saveUserProgress(progress);
+                }
+            }
+            function saveQuizScore(chapterKey, score) {
+                const progress = getUserProgress();
+                progress.quizScores[chapterKey] = score;
+                saveUserProgress(progress);
+            }
+            function getQuizScore(chapterKey) {
+                const progress = getUserProgress();
+                return progress.quizScores[chapterKey] || null;
+            }
+            // ---- End User Progress Utilities ----
+
+            // Get chapter key from Flask context
+            var state = "{{ session['state']|escapejs }}";
+            var grade = "{{ session['grade']|escapejs }}";
+            var subject = "{{ session['subject']|escapejs }}";
+            var chapterName = "{{ chapter_name|escapejs }}";
+            var chapterKey = state + '|' + grade + '|' + subject + '|' + chapterName;
+
+            // Restore progress on page load
+            window.onload = function() {
+                if (getUserProgress().completedChapters.includes(chapterKey)) {
+                    document.getElementById('completedBadge').style.display = 'inline';
+                }
+                var prevScore = getQuizScore(chapterKey);
+                if (prevScore !== null) {
+                    document.getElementById('prevScore').textContent = `Previous Score: ${prevScore}`;
+                }
+            };
+
+            // Quiz logic with progress saving and confetti
+            function checkQuiz() {
+                const questions = document.querySelectorAll('.question');
+                let score = 0;
+                questions.forEach(function(q, idx) {
+                    const answer = q.getAttribute('data-answer');
+                    const selected = q.querySelector('input[type=radio]:checked');
+                    const feedback = document.getElementById('feedback' + idx);
+                    if (!selected) {
+                        feedback.textContent = 'Please select an answer.';
+                        feedback.className = 'feedback incorrect';
+                    } else if (selected.value === answer) {
+                        feedback.textContent = 'Correct!';
+                        feedback.className = 'feedback correct';
+                        score++;
+                    } else {
+                        feedback.textContent = 'Incorrect.';
+                        feedback.className = 'feedback incorrect';
+                    }
+                });
+                saveQuizScore(chapterKey, score);
+                markChapterCompleted(chapterKey);
+                document.getElementById('completedBadge').style.display = 'inline';
+                document.getElementById('prevScore').textContent = `Previous Score: ${score}`;
+                if (score === questions.length && questions.length > 0) {
+                    confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+                }
+            }
+            </script>
+            {% endif %}
+            <div class="voice-section mt-4">
+                <h2>Record Your Voice Message</h2>
+                <div class="voice-controls">
+                    <button id="recordBtn">Record</button>
+                    <button id="stopBtn" disabled>Stop</button>
+                    <button id="uploadBtn" disabled>Upload</button>
+                </div>
+                <audio id="audioPlayback" controls style="display:none;"></audio>
+                <div id="uploadStatus"></div>
+            </div>
+            <script>
+            let mediaRecorder;
+            let audioChunks = [];
+            let audioBlob;
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const audioPlayback = document.getElementById('audioPlayback');
+            const uploadStatus = document.getElementById('uploadStatus');
+
+            recordBtn.onclick = async function() {
+                audioChunks = [];
+                uploadStatus.textContent = '';
+                audioPlayback.style.display = 'none';
+                uploadBtn.disabled = true;
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+                recordBtn.disabled = true;
+                stopBtn.disabled = false;
+                mediaRecorder.ondataavailable = e => {
+                    audioChunks.push(e.data);
+                };
+                mediaRecorder.onstop = e => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioPlayback.src = URL.createObjectURL(audioBlob);
+                    audioPlayback.style.display = 'block';
+                    uploadBtn.disabled = false;
+                };
+            };
+
+            stopBtn.onclick = function() {
+                mediaRecorder.stop();
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+            uploadBtn.onclick = async function() {
+                if (!audioBlob) return;
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'voice_message.webm');
+                uploadStatus.textContent = 'Uploading...';
+                try {
+                    const response = await fetch('/upload-voice', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (response.ok) {
+                        uploadStatus.textContent = 'Upload successful!';
+                    } else {
+                        uploadStatus.textContent = 'Upload failed.';
+                    }
+                } catch (err) {
+                    uploadStatus.textContent = 'Upload error.';
+                }
+            };
+            </script>
+        {% else %}
+            <p class="p-4">No lesson data available for this chapter.</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html> 

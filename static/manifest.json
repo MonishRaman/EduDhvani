@@ -1,15 +1,21 @@
 {
-  "name": "EduDhvani",
-  "short_name": "EduDhvani",
+  "name": "Edu App",
+  "short_name": "EduApp",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#2e7d32",
-  "theme_color": "#2e7d32",
+  "background_color": "#f8f9fa",
+  "theme_color": "#2980b9",
+  "description": "An educational PWA for onboarding, subject selection, and lessons.",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/static/icons/icon-192.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
-}
+} 

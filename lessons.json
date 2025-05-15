@@ -1,0 +1,23 @@
+{
+  "Karnataka": {
+    "Primary": {
+      "Math": {
+        "Numbers": {
+          "video_url": "https://example.com/videos/numbers.mp4",
+          "audio_url": "https://example.com/audios/numbers.mp3",
+          "quiz": [
+            {"question": "What is 2 + 2?", "options": ["3", "4", "5"], "answer": "4"},
+            {"question": "What comes after 5?", "options": ["4", "6", "7"], "answer": "6"}
+          ]
+        },
+        "Addition": {
+          "video_url": "https://example.com/videos/addition.mp4",
+          "audio_url": "https://example.com/audios/addition.mp3",
+          "quiz": [
+            {"question": "What is 1 + 1?", "options": ["1", "2", "3"], "answer": "2"}
+          ]
+        }
+      }
+    }
+  }
+} 
