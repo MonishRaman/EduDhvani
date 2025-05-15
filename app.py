@@ -1,86 +1,102 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, flash
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, session, url_for, send_from_directory
+import json
 import os
 
 app = Flask(__name__)
-app.secret_key = "edudhvani_secret"
-app.config['UPLOAD_FOLDER'] = 'uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.secret_key = 'your_secret_key'  # Replace with a secure key in production
 
-# Dummy data for states, grades, subjects, chapters
-STATES = ["Maharashtra", "Tamil Nadu", "West Bengal"]
-GRADES = ["6", "7", "8", "9", "10"]
-SUBJECTS = {
-    "Maharashtra": ["Math", "Science", "Marathi"],
-    "Tamil Nadu": ["Math", "Science", "Tamil"],
-    "West Bengal": ["Math", "Science", "Bengali"]
-}
-CHAPTERS = {
-    "Math": ["Numbers", "Algebra", "Geometry"],
-    "Science": ["Plants", "Animals", "Physics"],
-    "Marathi": ["Kavita", "Vyakaran"],
-    "Tamil": ["Kavithai", "Ilakkanam"],
-    "Bengali": ["Kabita", "Byakaran"]
-}
+@app.route('/')
+def landing():
+    return render_template('landing.html')
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/onboarding', methods=['GET', 'POST'])
 def onboarding():
-    if request.method == "POST":
-        session['name'] = request.form['name']
+    if request.method == 'POST':
+        session['user_name'] = request.form['user_name']
         session['school_type'] = request.form['school_type']
         session['state'] = request.form['state']
         session['grade'] = request.form['grade']
-        return redirect(url_for('dashboard'))
-    return render_template("onboarding.html", states=STATES, grades=GRADES)
+        return redirect(url_for('select_subject'))
+    return render_template('onboarding.html')
 
-@app.route("/dashboard")
-def dashboard():
+@app.route('/select-subject', methods=['GET', 'POST'])
+def select_subject():
     state = session.get('state')
-    subjects = SUBJECTS.get(state, [])
-    return render_template("dashboard.html", name=session.get('name'), subjects=subjects)
+    grade = session.get('grade')
+    if not state or not grade:
+        return redirect(url_for('onboarding'))
 
-@app.route("/module/<subject>")
-def module(subject):
-    chapters = CHAPTERS.get(subject, [])
-    return render_template("module.html", subject=subject, chapters=chapters)
+    # Load subjects from syllabus.json
+    syllabus_path = os.path.join(os.path.dirname(__file__), 'syllabus.json')
+    with open(syllabus_path, 'r', encoding='utf-8') as f:
+        syllabus = json.load(f)
+    subjects = syllabus.get(state, {}).get(grade, [])
 
-@app.route("/quiz/<subject>/<chapter>", methods=["GET", "POST"])
-def quiz(subject, chapter):
-    # Dummy quiz
-    questions = [
-        {"q": f"What is 2+2 in {subject}?", "a": "4"},
-        {"q": f"Name a topic in {chapter}.", "a": chapter}
-    ]
-    feedback = None
-    if request.method == "POST":
-        answers = [request.form.get(f"q{i}") for i in range(len(questions))]
-        correct = sum(1 for i, ans in enumerate(answers) if ans and ans.strip().lower() == questions[i]["a"].lower())
-        feedback = f"You got {correct}/{len(questions)} correct!"
-    return render_template("quiz.html", subject=subject, chapter=chapter, questions=questions, feedback=feedback)
+    if request.method == 'POST':
+        selected_subject = request.form.get('subject')
+        if selected_subject in subjects:
+            session['subject'] = selected_subject
+            return redirect(url_for('syllabus'))
+    return render_template('select_subject.html', subjects=subjects)
 
-@app.route("/doubt", methods=["GET", "POST"])
-def doubt():
-    if request.method == "POST":
-        if 'voice' in request.files:
-            f = request.files['voice']
-            filename = secure_filename(f.filename)
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            flash("Doubt submitted successfully!", "success")
-            return redirect(url_for('doubt'))
-    return render_template("doubt.html")
+@app.route('/syllabus')
+def syllabus():
+    subject = session.get('subject')
+    if not subject:
+        return redirect(url_for('select_subject'))
+    return f"<h1>Syllabus for {subject}</h1>"
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/chapters')
+def chapters():
+    state = session.get('state')
+    grade = session.get('grade')
+    subject = session.get('subject')
+    if not (state and grade and subject):
+        return redirect(url_for('onboarding'))
+    syllabus_path = os.path.join(os.path.dirname(__file__), 'syllabus.json')
+    with open(syllabus_path, 'r', encoding='utf-8') as f:
+        syllabus = json.load(f)
+    chapters = syllabus.get(state, {}).get(grade, {}).get(subject, [])
+    return render_template('chapters.html', subject=subject, chapters=chapters)
 
-# PWA manifest and service worker
-@app.route('/manifest.json')
-def manifest():
-    return send_from_directory('static', 'manifest.json')
+@app.route('/lesson/<int:chapter_id>')
+def lesson(chapter_id):
+    state = session.get('state')
+    grade = session.get('grade')
+    subject = session.get('subject')
+    if not (state and grade and subject):
+        return redirect(url_for('onboarding'))
+    syllabus_path = os.path.join(os.path.dirname(__file__), 'syllabus.json')
+    with open(syllabus_path, 'r', encoding='utf-8') as f:
+        syllabus = json.load(f)
+    chapters = syllabus.get(state, {}).get(grade, {}).get(subject, [])
+    if 0 <= chapter_id < len(chapters):
+        chapter_name = chapters[chapter_id]
+    else:
+        chapter_name = 'Unknown Chapter'
+        return f"<h1>Lesson: {chapter_name}</h1>"
 
-@app.route('/service-worker.js')
-def service_worker():
-    return send_from_directory('static', 'service-worker.js')
+    # Load lesson data from lessons.json
+    lessons_path = os.path.join(os.path.dirname(__file__), 'lessons.json')
+    lesson_data = None
+    if os.path.exists(lessons_path):
+        with open(lessons_path, 'r', encoding='utf-8') as f:
+            lessons = json.load(f)
+        lesson_data = lessons.get(state, {}).get(grade, {}).get(subject, {}).get(chapter_name, None)
+    return render_template('lesson.html', chapter_name=chapter_name, lesson=lesson_data)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route('/upload-voice', methods=['POST'])
+def upload_voice():
+    if 'audio' not in request.files:
+        return 'No audio file', 400
+    audio = request.files['audio']
+    if audio.filename == '':
+        return 'No selected file', 400
+    upload_dir = os.path.join(os.path.dirname(__file__), 'uploads')
+    os.makedirs(upload_dir, exist_ok=True)
+    save_path = os.path.join(upload_dir, audio.filename)
+    audio.save(save_path)
+    return 'OK', 200
+
+if __name__ == '__main__':
+    app.run(debug=True) 

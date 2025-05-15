@@ -1,0 +1,122 @@
+{
+  "Karnataka": {
+    "Primary": {
+      "Math": ["Numbers", "Addition", "Subtraction"],
+      "EVS": ["Plants", "Animals"],
+      "Kannada": ["Alphabets", "Poems"]
+    },
+    "Upper Primary": {
+      "Math": ["Fractions", "Decimals"],
+      "Science": ["Light", "Sound"],
+      "Social Studies": ["History", "Geography"]
+    },
+    "Secondary": {
+      "Math": ["Algebra", "Geometry"],
+      "Science": ["Physics", "Chemistry"],
+      "Social Studies": ["Civics", "Economics"],
+      "English": ["Grammar", "Literature"]
+    },
+    "Higher Secondary": {
+      "Math": ["Calculus", "Statistics"],
+      "Physics": ["Mechanics", "Optics"],
+      "Chemistry": ["Organic", "Inorganic"],
+      "Biology": ["Botany", "Zoology"]
+    }
+  },
+  "Maharashtra": {
+    "Primary": {
+      "Math": ["Numbers", "Addition"],
+      "EVS": ["Water", "Air"],
+      "Marathi": ["Stories", "Poems"]
+    },
+    "Upper Primary": {
+      "Math": ["Fractions", "Decimals"],
+      "Science": ["Plants", "Animals"],
+      "Social Studies": ["History", "Civics"]
+    },
+    "Secondary": {
+      "Math": ["Algebra", "Geometry"],
+      "Science": ["Physics", "Biology"],
+      "Social Studies": ["Geography", "Economics"],
+      "English": ["Grammar", "Literature"]
+    },
+    "Higher Secondary": {
+      "Math": ["Calculus", "Statistics"],
+      "Physics": ["Mechanics", "Optics"],
+      "Chemistry": ["Organic", "Inorganic"],
+      "Biology": ["Botany", "Zoology"]
+    }
+  },
+  "Tamil Nadu": {
+    "Primary": {
+      "Math": ["Numbers", "Addition"],
+      "EVS": ["Water", "Air"],
+      "Tamil": ["Stories", "Poems"]
+    },
+    "Upper Primary": {
+      "Math": ["Fractions", "Decimals"],
+      "Science": ["Plants", "Animals"],
+      "Social Studies": ["History", "Civics"]
+    },
+    "Secondary": {
+      "Math": ["Algebra", "Geometry"],
+      "Science": ["Physics", "Biology"],
+      "Social Studies": ["Geography", "Economics"],
+      "English": ["Grammar", "Literature"]
+    },
+    "Higher Secondary": {
+      "Math": ["Calculus", "Statistics"],
+      "Physics": ["Mechanics", "Optics"],
+      "Chemistry": ["Organic", "Inorganic"],
+      "Biology": ["Botany", "Zoology"]
+    }
+  },
+  "West Bengal": {
+    "Primary": {
+      "Math": ["Numbers", "Addition"],
+      "EVS": ["Water", "Air"],
+      "Bengali": ["Stories", "Poems"]
+    },
+    "Upper Primary": {
+      "Math": ["Fractions", "Decimals"],
+      "Science": ["Plants", "Animals"],
+      "Social Studies": ["History", "Civics"]
+    },
+    "Secondary": {
+      "Math": ["Algebra", "Geometry"],
+      "Science": ["Physics", "Biology"],
+      "Social Studies": ["Geography", "Economics"],
+      "English": ["Grammar", "Literature"]
+    },
+    "Higher Secondary": {
+      "Math": ["Calculus", "Statistics"],
+      "Physics": ["Mechanics", "Optics"],
+      "Chemistry": ["Organic", "Inorganic"],
+      "Biology": ["Botany", "Zoology"]
+    }
+  },
+  "Uttar Pradesh": {
+    "Primary": {
+      "Math": ["Numbers", "Addition"],
+      "EVS": ["Water", "Air"],
+      "Hindi": ["Stories", "Poems"]
+    },
+    "Upper Primary": {
+      "Math": ["Fractions", "Decimals"],
+      "Science": ["Plants", "Animals"],
+      "Social Studies": ["History", "Civics"]
+    },
+    "Secondary": {
+      "Math": ["Algebra", "Geometry"],
+      "Science": ["Physics", "Biology"],
+      "Social Studies": ["Geography", "Economics"],
+      "English": ["Grammar", "Literature"]
+    },
+    "Higher Secondary": {
+      "Math": ["Calculus", "Statistics"],
+      "Physics": ["Mechanics", "Optics"],
+      "Chemistry": ["Organic", "Inorganic"],
+      "Biology": ["Botany", "Zoology"]
+    }
+  }
+} 

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chapters for {{ subject }} | EduApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Baloo 2', cursive; background: #e3f2fd; }
+        .chapter-card { border-radius: 18px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.1s; cursor: pointer; margin-bottom: 18px; }
+        .chapter-card:hover { transform: scale(1.03); background: #fffbe7; }
+        .completed-chapter { color: #27ae60; font-weight: bold; margin-left: 6px; }
+        .mascot { width: 70px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 600px; margin: 40px auto;">
+        <div class="text-center mb-4">
+            <img src="/static/icons/icon-192.png" class="mascot" alt="Mascot">
+            <h2>Chapters for {{ subject }}</h2>
+            <p class="text-secondary">Choose a chapter to begin your adventure!</p>
+        </div>
+        {% if chapters %}
+            <div class="row">
+            {% for chapter in chapters %}
+                <div class="col-12">
+                    <a href="{{ url_for('lesson', chapter_id=loop.index0) }}" class="chapter-link text-decoration-none">
+                        <div class="chapter-card p-3 d-flex align-items-center" data-chapter-key="{{ session['state']|escapejs }}|{{ session['grade']|escapejs }}|{{ session['subject']|escapejs }}|{{ chapter|escapejs }}">
+                            <span style="font-size:1.3em; color:#2980b9;">{{ chapter }}</span>
+                            <span class="completed-chapter ms-auto" style="display:none;">✓</span>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p>No chapters found for this subject.</p>
+        {% endif %}
+    </div>
+    <script type="text/javascript">
+    function getUserProgress() {
+        const progress = localStorage.getItem('eduUserProgress');
+        return progress ? JSON.parse(progress) : { completedChapters: [], quizScores: {} };
+    }
+    window.onload = function() {
+        const progress = getUserProgress();
+        document.querySelectorAll('.chapter-card').forEach(card => {
+            const chapterKey = card.getAttribute('data-chapter-key');
+            if (progress.completedChapters.includes(chapterKey)) {
+                card.querySelector('.completed-chapter').style.display = 'inline';
+            }
+        });
+    };
+    </script>
+</body>
+</html> 

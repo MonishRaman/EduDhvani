@@ -1,2 +1,1 @@
-Flask
-Werkzeug
+Flask>=2.0 
